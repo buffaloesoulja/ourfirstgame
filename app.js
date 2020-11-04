@@ -8,7 +8,6 @@ app.get("/", function(req, res)
 	res.sendFile('/public/space_invaders.html', {root: __dirname })
 }); 
 
-
 app.get("*", function(req, res){
 	res.sendFile('/public/space_invaders.html', {root: __dirname })
 });

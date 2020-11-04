@@ -1,3 +1,40 @@
-<h1>
-	space invaders
-</h1>
+<html>
+	<head>
+		<title> this game will be cool as fuck</title>
+		
+		 <link rel="stylesheet" href="space_invader_style.css">
+		
+		<!----note that paper.js library is copied in via CDN --->	
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.min.js" integrity="sha512-ehNJ9gpOQJn8EYlA3P1zUtfrh97G/6WNsjfPfpnMxbo6PX6UXHRj8Ny5MCd36w2eTPlvOSVuXLZmY+/VLVhI4A==" crossorigin="anonymous"></script>
+		
+		<!--- set up the canvas, this is where all the code for the game goes basically--->
+		<script type="text/paperscript" canvas="theCanvas"> 
+		/*
+			creating a spaceship object that represents the player.
+			set it at the bottom (-60 because thats the height of the "ship")
+		*/
+			var point = new Point(view.size.width/2, view.size.height-60);
+			var size = new Size(60, 60);
+			var spaceship = new Path.Rectangle(point, size);
+			spaceship.strokeColor = 'white';
+		
+		//move the spaceship around. If we press left, go left, etc. 
+		//###### what do we want the behavior to be when you go off the screen? ###################
+			tool.onKeyDown = function(event) {
+				if (event.key == 'left') {
+				spaceship.position = spaceship.position + new Point(-5, 0); 
+				}
+				if (event.key == 'right') {
+				spaceship.position = spaceship.position + new Point(5, 0); 
+				}
+			}
+			
+			
+		
+		</script>
+	</head>
+	<body>
+		<!---- the only thing you need in the body really is the canvas object--->
+		<canvas id="theCanvas" resize></canvas>
+	</body>
+</html>
