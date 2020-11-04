@@ -14,17 +14,29 @@
 			set it at the bottom (-60 because thats the height of the "ship")
 		*/
 			var point = new Point(view.size.width/2, view.size.height-60);
+			
 			var size = new Size(60, 60);
 			var spaceship = new Path.Rectangle(point, size);
 			spaceship.strokeColor = 'white';
-		
-		//move the spaceship around. If we press left, go left, etc. 
-		//###### what do we want the behavior to be when you go off the screen? ###################
-			tool.onKeyDown = function(event) {
-				if (event.key == 'left') {
-				spaceship.position = spaceship.position + new Point(-5, 0); 
+			
+			function onFrame(event)
+			{
+				//if the key state is left, move left 
+				if(Key.isDown('left'))
+				{
+					if (spaceship.bounds.bottomLeft.x <= 0) { 
+						spaceship.position = new Point(view.size.width, view.size.height - 30);
+						
+						}
+						spaceship.position = spaceship.position + new Point(-5, 0); 
 				}
-				if (event.key == 'right') {
+				//if the key state is right, move right 
+				if (Key.isDown('right'))
+				{
+					if (spaceship.bounds.bottomLeft.x >= view.size.width) { 
+						spaceship.position = new Point(0, view.size.height - 30);
+						
+						}
 				spaceship.position = spaceship.position + new Point(5, 0); 
 				}
 			}
