@@ -8,17 +8,47 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.min.js" integrity="sha512-ehNJ9gpOQJn8EYlA3P1zUtfrh97G/6WNsjfPfpnMxbo6PX6UXHRj8Ny5MCd36w2eTPlvOSVuXLZmY+/VLVhI4A==" crossorigin="anonymous"></script>
 		
 		<!--- set up the canvas, this is where all the code for the game goes basically--->
-		<script type="text/paperscript" canvas="theCanvas"> 
+		<script type="text/paperscript" canvas="theCanvas">	
+			var bullets = [];  //this is to hold the bullets 
+			var enemies = [];  //this is to hold the enemy spaceships
+			
+			var spaceship_height = 40; 
+			var spaceship_width = 40;
+			var enemy_height = 30; 
+			var enemy_width = 30; 
+			var enemy_direction = 1.5; 
+			var bullet_width = 5;
+			var bullet_height = 50; 
 		/*
 			creating a spaceship object that represents the player.
-			set it at the bottom (-60 because thats the height of the "ship")
+			set it at the bottom
 		*/
-			var point = new Point(view.size.width/2, view.size.height-60);
-			
-			var size = new Size(60, 60);
+			var point = new Point(view.size.width/2, view.size.height - spaceship_height);
+			var size = new Size(spaceship_width, spaceship_height);
 			var spaceship = new Path.Rectangle(point, size);
 			spaceship.strokeColor = 'white';
 			
+			/*
+			   creating enemy objects. start out with 7 
+			*/
+			
+			var num_enemies = 10; 
+			
+			for (var i = 0; i < num_enemies; i++){
+			var point = new Point(100 * i + 50, 0);
+			var size = new Size(enemy_width, enemy_height);
+			var new_enemy = new Path.Rectangle(point, size);
+			new_enemy.strokeColor = 'green';
+			
+			enemies.push(new_enemy); 
+			
+			}
+
+			
+			/* in order to make the movements continuous, check to see which button is pressed 
+			*  inside of a game loop rather than just inside if/else statements 
+			*
+			*/ 
 			function onFrame(event)
 			{
 				//if the key state is left, move left 
@@ -37,12 +67,57 @@
 						spaceship.position = new Point(0, view.size.height - 30);
 						
 						}
-				spaceship.position = spaceship.position + new Point(5, 0); 
+					spaceship.position = spaceship.position + new Point(5, 0); 
+				}
+			
+				//move the bullets each frame 
+				for(var i = 0; i < bullets.length; i++)
+				{
+					bullets[i].translate(0, -5);
+				}
+				
+				//move the enemies each frame 
+				for (var i = 0; i < enemies.length; i++)
+				{
+					enemies[i].translate(enemy_direction, 0); 
+				}
+				
+				//shift enemies down and to the other side if we hit a wall
+				if (enemies[enemies.length-1].bounds.topRight.x >= view.size.width || enemies[0].bounds.topLeft.x <= 0)
+				{
+					enemy_direction = enemy_direction * -1; 
+					for (var i = 0; i < enemies.length; i++)
+					{
+						enemies[i].translate(0, enemy_height + 10); 
+					}
+					
 				}
 			}
 			
-			
+			//fire a bullet every time we press spacebar 
+			var bullet_fired = 0;
+			function onKeyDown(event) {
+					 
+					if (event.key == 'space' && bullet_fired == 0)
+					{
+						var point = new Point(spaceship.position.x, spaceship.position.y - spaceship_height);
+						var size = new Size(bullet_width, bullet_height);
+						var newbullet = new Path.Rectangle(point, size);
+						newbullet.strokeColor = 'pink';
+						bullets.push(newbullet);
+						bullet_fired = 1; 
+					}
+					 
+			}
 		
+			//this was added to make sure that only one bullet fires each time you press space 
+			function onKeyUp(event)
+			{
+				if (event.key == 'space')
+				{
+					bullet_fired = 0; 
+				}
+			}
 		</script>
 	</head>
 	<body>
