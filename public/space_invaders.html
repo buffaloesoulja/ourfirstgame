@@ -11,14 +11,20 @@
 		<script type="text/paperscript" canvas="theCanvas">	
 			var bullets = [];  //this is to hold the bullets 
 			var enemies = [];  //this is to hold the enemy spaceships
-			
+			var trash_can = [] // holds indexes of enemies to be deleted from the game 
+
+			//variables that can all be changed to get all kinds of weird shapes and combos 
 			var spaceship_height = 40; 
 			var spaceship_width = 40;
 			var enemy_height = 30; 
-			var enemy_width = 30; 
-			var enemy_direction = 1.5; 
+			var enemy_width = 30;  
 			var bullet_width = 5;
 			var bullet_height = 50; 
+			var num_enemies = 7; 
+			var enemy_direction = .5;   
+			var num_rows = 4; 
+
+			console.log("hello");
 		/*
 			creating a spaceship object that represents the player.
 			set it at the bottom
@@ -28,29 +34,23 @@
 			var spaceship = new Path.Rectangle(point, size);
 			spaceship.strokeColor = 'white';
 			
-			/*
-			   creating enemy objects. start out with 7 
-			*/
-			
-			var num_enemies = 10; 
-			
-			for (var i = 0; i < num_enemies; i++){
-			var point = new Point(100 * i + 50, 0);
-			var size = new Size(enemy_width, enemy_height);
-			var new_enemy = new Path.Rectangle(point, size);
-			new_enemy.strokeColor = 'green';
-			
-			enemies.push(new_enemy); 
-			
-			}
-
+			//make the enemies here
+			add_enemies(num_enemies, num_rows);
 			
 			/* in order to make the movements continuous, check to see which button is pressed 
 			*  inside of a game loop rather than just inside if/else statements 
-			*
-			*/ 
+			*/
+			
 			function onFrame(event)
 			{
+			
+				for (var k = 0; k < trash_can.length; k++)
+				{ 
+					enemies[trash_can[k][0]].splice(trash_can[k][1], 1);
+				}
+
+				trash_can = []; 
+					
 				//if the key state is left, move left 
 				if(Key.isDown('left'))
 				{
@@ -76,23 +76,47 @@
 					bullets[i].translate(0, -5);
 				}
 				
-				//move the enemies each frame 
-				for (var i = 0; i < enemies.length; i++)
+				//move the enemies each frame and delete them if they were hit by bullet
+				for (var i = enemies.length-1; i >= 0; i--)
 				{
-					enemies[i].translate(enemy_direction, 0); 
-				}
-				
-				//shift enemies down and to the other side if we hit a wall
-				if (enemies[enemies.length-1].bounds.topRight.x >= view.size.width || enemies[0].bounds.topLeft.x <= 0)
-				{
-					enemy_direction = enemy_direction * -1; 
-					for (var i = 0; i < enemies.length; i++)
+					for (var z = enemies[i].length-1; z >= 0; z--)
 					{
-						enemies[i].translate(0, enemy_height + 10); 
+						enemies[i][z].translate(enemy_direction, 0); //move them over to the left or right 
+
+						//if they hit the edges, move all enemies down
+						if(enemies[i][z].bounds.topRight.x >= view.size.width || enemies[i][z].bounds.topLeft.x <= 0)
+						{
+							enemy_direction = enemy_direction * -1; 
+
+							for (var k = 0; k < enemies.length; k++)
+							{
+								for (var j = 0; j < enemies[k].length; j++)
+								{
+									enemies[k][j].translate(0, enemy_height);
+								}
+								
+							}
+						}
+						
+						//check to see if any bullets hit the enemies
+						for (var j = bullets.length-1; j >= 0; j--)
+						{
+							if(enemies[i][z].bounds.intersects(bullets[j].bounds))
+							{
+								
+								enemies[i][z].remove();
+								bullets[j].remove(); 
+								bullets.splice(j, 1);
+
+								trash_can.push([i,z]); //schedule for trash collection 
+
+							}
+						}
 					}
 					
 				}
-			}
+				
+			} 
 			
 			//fire a bullet every time we press spacebar 
 			var bullet_fired = 0;
@@ -117,6 +141,25 @@
 				{
 					bullet_fired = 0; 
 				}
+			}
+			
+			function add_enemies(number_enemies, num_rows)
+			{
+				for (var j = 0; j < num_rows; j++)
+				{ 	
+					var new_enemy_row = [];
+					for (var i = 0; i < number_enemies; i++){
+						var point = new Point(100 * i + 50, j * 40); //maybe take out these hard coded values?
+						var size = new Size(enemy_width, enemy_height);
+						var new_enemy = new Path.Rectangle(point, size);
+						new_enemy.strokeColor = 'green';
+						new_enemy_row.push(new_enemy); 
+					}
+
+					enemies.push(new_enemy_row); 
+				}
+				
+	
 			}
 		</script>
 	</head>
